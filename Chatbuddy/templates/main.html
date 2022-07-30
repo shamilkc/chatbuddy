@@ -7,7 +7,7 @@
     <title>{% block title %} {% endblock %}</title>
 </head>
 <body>
-    <h1>HOME</h1>
+    <a href="{% url 'home'%}"><h1>LOGO</h1></a>
     <form method="get" action="{% url 'home'%}">
         <input type="text" name="q" placeholder="serch rooms....">
     </form>
