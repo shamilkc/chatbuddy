@@ -1,0 +1,14 @@
+
+    <h3>Recent activity</h3>
+    <hr>
+    {% for messege in room_messeges %}
+    <div>
+        <small>@{{messege.user}} {{messege.created|timesince}}
+        </small>
+        <small>replied to "{{messege.room}}"</small>
+        <p>{{messege}}</p>
+        <hr>
+    </div>
+    {% endfor%}
+
+   
