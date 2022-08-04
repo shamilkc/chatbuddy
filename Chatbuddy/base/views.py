@@ -110,8 +110,14 @@ def room (request,pk):
 
 def userProfile(request,pk):
     user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messeges = user.messege_set.all()
+    topic = Topic.objects.all()
     context={
-        'user':user
+        'user':user,
+        'rooms':rooms,
+        'room_messeges':room_messeges,
+        'topic':topic
     }
     return render(request,'base/profile.html',context)
 
