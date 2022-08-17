@@ -2,11 +2,12 @@
 from email.message import Message
 from multiprocessing import context
 import re
+from unicodedata import name
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import is_valid_path
 from .models import Room ,Topic, Messege
-from .forms import roomForm
+from .forms import roomForm,UserForm
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -126,21 +127,27 @@ def userProfile(request,pk):
 @login_required(login_url='login')
 def createRoom(request):
     form = roomForm()
+    topics = Topic.objects.all()
     if request.method == 'POST':
-        form = roomForm(request.POST)
-        if form.is_valid():
-            room = form.save(commit=False)
-            room.host = request.user
-            room.save()
-            return redirect('home')
+        topic_name = request.POST.get('topic')
+        topic,created = Topic.objects.get_or_create(name=topic_name) 
+        Room.objects.create(
+            host = request.user,
+            topic = topic,
+            name=request.POST.get('name'),
+            description = request.POST.get('description')
+        )
+        return redirect('home')
 
     context = {
-        'form':form
+        'form':form,
+        'topics':topics
     }
     return render(request, 'base/room_form.html',context)
 
 @login_required(login_url='login')
 def updateRoom(request,pk):
+    topics = Topic.objects.all()
     room = Room.objects.get(id=pk)
     form = roomForm(instance=room)
 
@@ -148,12 +155,17 @@ def updateRoom(request,pk):
         return HttpResponse("you are not allowed here!!!")
 
     if request.method == 'POST':
-        form = roomForm(request.POST,instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
+        topic_name = request.POST.get('topic')
+        topic,created = Topic.objects.get_or_create(name=topic_name) 
+        room.name = request.POST.get('name')
+        room.topic = topic
+        room.description = request.POST.get('description')
+        room.save()
+        return redirect('home')
     context ={
-        'form':form
+        'form':form,
+        'topics':topics,
+        'room':room
     }
     return render(request,'base/room_form.html',context)
 
@@ -178,3 +190,18 @@ def deleteMessege(request,pk):
         messege.delete()
         return redirect('home')
     return render(request,'base/delete.html',{'obj':messege})
+
+@login_required(login_url='login')
+def updateUser(request):
+    user =request.user
+    form = UserForm(instance=user)
+
+    if request.method == "POST":
+        form = UserForm(request.POST,instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile',pk=user.id)
+    context ={
+        'form':form
+    }
+    return render(request,'base/update-user.html',context)
