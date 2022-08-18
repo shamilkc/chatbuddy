@@ -1,6 +1,7 @@
 
 from email.message import Message
 from multiprocessing import context
+from pydoc_data.topics import topics
 import re
 from unicodedata import name
 from django.http import HttpResponse
@@ -74,7 +75,7 @@ def home(request):
         Q(name__icontains=q)|
         Q(description__icontains=q)
         )
-    topics =Topic.objects.all()
+    topics =Topic.objects.all()[0:5]
     room_count = rooms.count()
     room_messeges = Messege.objects.filter(Q(room__topic__name__icontains=q))
     context ={
@@ -205,3 +206,21 @@ def updateUser(request):
         'form':form
     }
     return render(request,'base/update-user.html',context)
+
+
+def topic(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    topics= Topic.objects.filter(name__icontains=q)
+    context={
+        'topics':topics,
+        }
+    return render(request,'base/topics.html',context)
+
+
+def activitiesPage(request):
+    room_messeges = Messege.objects.all()
+
+    context={
+        'room_messeges':room_messeges
+        }
+    return render(request,'base/activity.html',context)
