@@ -14,7 +14,7 @@
     <div class="roomListRoom__content">
       <a href="{% url 'room' room.id %}">{{room.name}}</a>
       <p>
-      
+      {{room.description|truncatewords:20}}
       </p>
     </div>
     <div class="roomListRoom__meta">
